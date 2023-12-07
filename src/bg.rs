@@ -2,8 +2,6 @@ use std::path::PathBuf;
 
 use gtk::glib::{Receiver, Sender};
 
-use crate::Event;
-
 pub enum BgEvent {
     Load(PathBuf),
 
