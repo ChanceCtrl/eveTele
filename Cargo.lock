@@ -319,6 +319,7 @@ version = "0.1.0"
 dependencies = [
  "gtk4",
  "plotters",
+ "plotters-cairo",
  "serialport",
  "tokio",
 ]
@@ -1094,6 +1095,16 @@ checksum = "0cebbe1f70205299abc69e8b295035bb52a6a70ee35474ad10011f0a4efb8543"
 dependencies = [
  "gif",
  "image",
+ "plotters-backend",
+]
+
+[[package]]
+name = "plotters-cairo"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a73c5d841cec447bc191e932df2d58ef6bfa349e37027bf29a3e8d759d4c85b"
+dependencies = [
+ "cairo-rs",
  "plotters-backend",
 ]
 

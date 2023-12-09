@@ -1,22 +1,22 @@
 use gtk::prelude::*;
-use gtk::{glib, Application};
-use std::path::PathBuf;
+
+// Refrence other files
+mod app;
+mod serial_script;
+mod widgets;
 
 // Set APP_ID because GTK wants it
 const APP_ID: &str = "org.eveTele";
 
-// Refrence other files
-mod app;
-mod bg;
-mod serial_script;
-
-fn main() -> glib::ExitCode {
+fn main() -> gtk::glib::ExitCode {
     // Create new 'Application' called "app"
-    let app = Application::builder().application_id(APP_ID).build();
+    let app = gtk::Application::builder().application_id(APP_ID).build();
 
     // Give "app" a window to present
-    app.connect_activate(|app| app::App::new(&app));
+    app.connect_activate(|app| app::AppStruct::new(&app));
 
     // Run the app
     app.run()
 }
+
+// If I write the word 'app' one more time ima kill myself

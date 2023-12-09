@@ -1,18 +1,21 @@
 use gtk::glib::clone;
-use gtk::{prelude::*, Box, Button, HeaderBar, Label, Stack, StackSwitcher};
-use gtk::{Application, ApplicationWindow, DropDown};
+use gtk::prelude::*;
+use gtk::{
+    Application, ApplicationWindow, Button, DropDown, HeaderBar, Label, Stack, StackSwitcher,
+};
 
 use crate::serial_script;
+use crate::widgets::Graph2D;
 
-pub struct App {
+pub struct AppStruct {
     pub window: ApplicationWindow,
     pub container: gtk::Grid,
     pub header: HeaderBar,
-    // pub stack_switch: StackSwitcher,
-    // pub stack: Stack,
+    pub stack_switch: StackSwitcher,
+    pub stack: Stack,
 }
 
-impl App {
+impl AppStruct {
     pub fn new(app: &Application) {
         // Create a window and set the title
         let window = ApplicationWindow::builder()
@@ -21,10 +24,19 @@ impl App {
             .build();
 
         // Create a box to throw widgets in
-        let container = gtk::Grid::builder()
+        let grid = gtk::Grid::builder()
             .row_spacing(4)
             .column_spacing(4)
             .build();
+
+        // let plotbox = gtk::Box::builder()
+        //     .orientation(gtk::Orientation::Vertical)
+        //     .build();
+
+        let graph_snap = Graph2D::new();
+
+        // plotbox.append(&graph_snap);
+        grid.attach(&graph_snap, 0, 0, 256, 128);
 
         // Make DropDown for serial ports
         let wack = serial_script::list_ports();
@@ -58,7 +70,7 @@ impl App {
 
         // Present window
         window.set_titlebar(Some(&header));
-        window.set_child(Some(&container));
+        window.set_child(Some(&grid));
         window.present();
     }
 }
