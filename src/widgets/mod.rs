@@ -1,30 +1,26 @@
-mod graph;
+mod graph1d;
+mod graph2d2y;
 
 gtk::glib::wrapper! {
-    pub struct Graph2D(ObjectSubclass<graph::Graph2D>)
+    pub struct Graph2D2Y(ObjectSubclass<graph2d2y::Graph2D2Y>)
         @extends gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl Graph2D {
+gtk::glib::wrapper! {
+    pub struct Graph1D(ObjectSubclass<graph1d::Graph1D>)
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
+}
+
+impl Graph2D2Y {
     pub fn new() -> Self {
         gtk::glib::Object::builder().build()
     }
 }
 
-// pub struct CanIt {
-//     // The ID its tracking
-//     pub id: String,
-//     // The Value from that ID
-//     pub value: u32,
-// }
-//
-// impl CanIt {
-//     pub fn new(id: String) -> Self {
-//         Self { id, value: 0 }
-//     }
-//
-//     pub fn read(id: String) -> u32 {
-//         0
-//     }
-// }
+impl Graph1D {
+    pub fn new() -> Self {
+        gtk::glib::Object::builder().build()
+    }
+}

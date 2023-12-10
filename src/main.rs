@@ -2,7 +2,7 @@ use gtk::prelude::*;
 
 // Refrence other files
 mod app;
-mod serial_script;
+mod background;
 mod widgets;
 
 // Set APP_ID because GTK wants it

@@ -1,11 +1,12 @@
 use gtk::glib::clone;
-use gtk::prelude::*;
+use gtk::{prelude::*, Scale};
 use gtk::{
     Application, ApplicationWindow, Button, DropDown, HeaderBar, Label, Stack, StackSwitcher,
 };
 
-use crate::serial_script;
-use crate::widgets::Graph2D;
+use crate::background::ReadVal;
+// use crate::widgets::Graph2D2Y;
+use crate::widgets::Graph1D;
 
 pub struct AppStruct {
     pub window: ApplicationWindow,
@@ -20,7 +21,7 @@ impl AppStruct {
         // Create a window and set the title
         let window = ApplicationWindow::builder()
             .application(app)
-            .title("My GTK App")
+            .title("eveTele")
             .build();
 
         // Create a box to throw widgets in
@@ -33,14 +34,26 @@ impl AppStruct {
         //     .orientation(gtk::Orientation::Vertical)
         //     .build();
 
-        let graph_snap = Graph2D::new();
+        // Create a plot to plot shit
+        let graph_snap = Graph1D::new();
+
+        // Test slider to adjust value of the plot
+        let slider_boi = Scale::with_range(gtk::Orientation::Vertical, 0.0, 1024.0, 1.0);
+
+        slider_boi.connect_value_changed(
+            clone!(@strong graph_snap, @strong slider_boi => move |_| {
+            graph_snap.set_value(slider_boi.value());
+            graph_snap.queue_draw();
+            }),
+        );
 
         // plotbox.append(&graph_snap);
-        grid.attach(&graph_snap, 0, 0, 256, 128);
+        grid.attach(&graph_snap, 0, 0, 48, 128);
+        grid.attach(&slider_boi, 58, 0, 20, 128);
 
         // Make DropDown for serial ports
-        let wack = serial_script::list_ports();
-        let v: Vec<_> = wack.iter().map(|s| s.as_str()).collect();
+        let port_vec = ReadVal::list_ports();
+        let v: Vec<_> = port_vec.iter().map(|s| s.as_str()).collect();
         let port_drop = DropDown::from_strings(v.as_slice());
         port_drop.set_margin_top(1);
         port_drop.set_margin_bottom(1);
@@ -64,9 +77,13 @@ impl AppStruct {
         header.set_title_widget(Some(&title));
 
         // Test the selected port on click
-        port_test.connect_clicked(clone!(@strong port_test => move |_| {
-        port_test.set_label("Testing, check terminal");
-        }));
+        port_test.connect_clicked(
+            clone!(@strong port_test, @strong port_drop, @strong port_vec => move |_| {
+            port_test.set_label("Testing, check terminal");
+            println!("{}", port_drop.to_string());
+            ReadVal::start_bg_read(port_vec[port_drop.selected() as usize].clone());
+            }),
+        );
 
         // Present window
         window.set_titlebar(Some(&header));

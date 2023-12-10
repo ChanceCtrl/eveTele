@@ -9,27 +9,28 @@ use std::cell::Cell;
 use std::error::Error;
 // use std::f64;
 
+static N_DATA_POINTS: usize = 20 as usize;
+
 #[derive(Debug, Default, glib::Properties)]
-#[properties(wrapper_type = super::Graph2D)]
-pub struct Graph2D {
-    #[property(get, set, minimum = 0, maximum = 1024)]
-    min_max: Cell<u32>,
-    // value: Cell<f64>,
+#[properties(wrapper_type = super::Graph2D2Y)]
+pub struct Graph2D2Y {
+    #[property(get, set, minimum = 0.0, maximum = 1024.0)]
+    value: Cell<f64>,
 }
 
 #[glib::object_subclass]
-impl ObjectSubclass for Graph2D {
-    const NAME: &'static str = "Graph2D";
-    type Type = super::Graph2D;
+impl ObjectSubclass for Graph2D2Y {
+    const NAME: &'static str = "Graph2D2Y";
+    type Type = super::Graph2D2Y;
     type ParentType = gtk::Widget;
 
     fn class_init(klass: &mut Self::Class) {
         klass.set_layout_manager_type::<gtk::BinLayout>();
-        crate::widgets::Graph2D::ensure_type();
+        crate::widgets::Graph2D2Y::ensure_type();
     }
 }
 
-impl ObjectImpl for Graph2D {
+impl ObjectImpl for Graph2D2Y {
     fn properties() -> &'static [glib::ParamSpec] {
         Self::derived_properties()
     }
@@ -44,11 +45,10 @@ impl ObjectImpl for Graph2D {
 
     fn constructed(&self) {
         self.parent_constructed();
-        self.obj().vexpands();
     }
 }
 
-impl WidgetImpl for Graph2D {
+impl WidgetImpl for Graph2D2Y {
     fn snapshot(&self, snapshot: &gtk::Snapshot) {
         // get width & height
         let width = self.obj().width() as u32;
@@ -65,12 +65,12 @@ impl WidgetImpl for Graph2D {
         let backend = CairoBackend::new(&cr, (width, height)).unwrap();
 
         // Draw in said box
-        self.plot_pdf(backend).unwrap();
+        self.plot_def(backend).unwrap();
     }
 }
 
-impl Graph2D {
-    pub fn plot_pdf<'a, DB: DrawingBackend + 'a>(
+impl Graph2D2Y {
+    pub fn plot_def<'a, DB: DrawingBackend + 'a>(
         &self,
         backend: DB,
     ) -> Result<(), Box<dyn Error + 'a>> {
@@ -82,15 +82,15 @@ impl Graph2D {
 
         // Try to create 'cartesian_2d' called "chart" and do some setup on it
         let mut chart = ChartBuilder::on(&root)
-            .x_label_area_size(35)
-            .y_label_area_size(40)
-            .right_y_label_area_size(40)
-            .margin(5)
+            .x_label_area_size(45)
+            .y_label_area_size(45)
+            .right_y_label_area_size(45)
+            .margin(10)
             .caption("Dual Y-Axis Example", ("sans-serif", 50.0).into_font())
-            .build_cartesian_2d(0f32..10f32, (0.1f32..1e10f32).log_scale())?
-            .set_secondary_coord(0f32..10f32, -1.0f32..1.0f32);
+            .build_cartesian_2d(0f32..N_DATA_POINTS as f32, (0.1f32..1e10f32).log_scale())?
+            .set_secondary_coord(0f32..N_DATA_POINTS as f32, -1.0f32..1.0f32);
 
-        // Graph thy 1st value
+        // Configure thy 1st value
         chart
             .configure_mesh()
             .disable_x_mesh()
@@ -108,7 +108,7 @@ impl Graph2D {
         // Draw first value
         chart
             .draw_series(LineSeries::new(
-                (0..=100).map(|x| (x as f32 / 10.0, (1.02f32).powf(x as f32 * x as f32 / 10.0))),
+                (0..=100).map(|x| (x as f32 / 10.0, 1.02f32.powf(x as f32 * x as f32))),
                 &BLUE,
             ))?
             .label("y = 1.02^x^2")
@@ -130,6 +130,20 @@ impl Graph2D {
             .draw()?;
 
         // Present thy work
+        root.present()?;
+        Ok(())
+    }
+
+    pub fn plot_new<'a, DB: DrawingBackend + 'a>(
+        &self,
+        backend: DB,
+    ) -> Result<(), Box<dyn Error + 'a>> {
+        // Define the area we draw in
+        let root = backend.into_drawing_area();
+
+        // Try to fill it with white
+        root.fill(&WHITE)?;
+
         root.present()?;
         Ok(())
     }
