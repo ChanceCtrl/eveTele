@@ -2,28 +2,47 @@ use std::time::Duration;
 
 use serialport;
 
+use super::ReadVal;
+
 // Read from port
-pub fn test(port_name: String) -> String {
-    // Connect to port
-    let mut port = serialport::new(&port_name.clone(), 9600)
+pub fn read(read: &ReadVal) -> ReadVal {
+    // Connect to the port from "read"
+    let mut port = serialport::new(&read.port.clone(), 9600)
         .timeout(Duration::from_millis(1000))
         .open()
         .expect("Cannot open serial port");
 
-    println!("{}", &port_name);
-
-    // Read from a serial port
+    // Set up some vars to store the data we get
     let mut serial_buf: Vec<u8> = vec![0];
-    loop {
-        let mut serial_line: String = String::new();
-        port.read(&mut serial_buf).expect("idk with reads");
+    let mut serial_line: String = String::new();
 
-        while serial_buf[0] != 10 {
-            serial_line.push(serial_buf[0] as char);
-            port.read(&mut serial_buf).expect("idk with reads 2");
-        }
+    // Read the data from the serial port and put it into a buf
+    port.read(&mut serial_buf).expect("idk with reads");
 
-        println!("{}", serial_line.to_string());
+    // Go thru each byte and save it to our string until we hit the return char
+    while serial_buf[0] != 10 {
+        serial_line.push(serial_buf[0] as char);
+        port.read(&mut serial_buf).expect("idk with reads 2");
+    }
+
+    if &serial_line[0..4] == read.id {
+        // Return the value read
+        return ReadVal {
+            port: read.port.clone(),
+            id: read.id.clone(),
+            val: serial_line[5..(serial_line.len() - 1)]
+                .parse::<f64>()
+                .unwrap_or(0.0),
+        };
+    } else {
+        // Return generic value on fail and print debug
+        println!("Can't parse the new line for some fucking reason lmao");
+
+        return ReadVal {
+            port: read.port.clone(),
+            id: read.id.clone(),
+            val: 0.0,
+        };
     }
 }
 

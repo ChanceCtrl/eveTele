@@ -1,3 +1,6 @@
+use std::time::Duration;
+
+use gtk::glib;
 use gtk::glib::clone;
 use gtk::{prelude::*, Scale};
 use gtk::{
@@ -53,8 +56,8 @@ impl AppStruct {
 
         // Make DropDown for serial ports
         let port_vec = ReadVal::list_ports();
-        let v: Vec<_> = port_vec.iter().map(|s| s.as_str()).collect();
-        let port_drop = DropDown::from_strings(v.as_slice());
+        let port_list: Vec<_> = port_vec.iter().map(|s| s.as_str()).collect();
+        let port_drop = DropDown::from_strings(port_list.as_slice());
         port_drop.set_margin_top(1);
         port_drop.set_margin_bottom(1);
 
@@ -76,14 +79,28 @@ impl AppStruct {
         header.pack_end(&port_drop);
         header.set_title_widget(Some(&title));
 
+        // Create var "read_port" and assign it the struct 'ReadVal'
+        let read_port = ReadVal::new(
+            port_vec[port_drop.selected() as usize].clone(),
+            "0xA0".to_string(),
+        );
+
         // Test the selected port on click
         port_test.connect_clicked(
-            clone!(@strong port_test, @strong port_drop, @strong port_vec => move |_| {
-            port_test.set_label("Testing, check terminal");
-            println!("{}", port_drop.to_string());
-            ReadVal::start_bg_read(port_vec[port_drop.selected() as usize].clone());
+            clone!(@strong port_test, @strong port_drop, @strong graph_snap => move |_| {
+                // Change lable of button
+                port_test.set_label("Testing, check terminal");
             }),
         );
+
+        // Update every mil
+        let update = move || {
+            // Update the graph value
+            graph_snap.set_value(ReadVal::bg_read(&read_port).val);
+            graph_snap.queue_draw();
+            glib::ControlFlow::Continue
+        };
+        glib::timeout_add_local(Duration::from_millis(10), update);
 
         // Present window
         window.set_titlebar(Some(&header));
