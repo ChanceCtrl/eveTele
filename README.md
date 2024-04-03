@@ -1,9 +1,2 @@
-# Elo
-## Shit don't work.
-I know this and I am trying to make it work
-
-## When will it work?
-Fuck if I know, hopefully soon.
-
-## How will it work?
-It's gonna read a serial port for raw CAN messages and allow the user to create a widget to track the value of a given CAN packet over time. More or less acting as a wireless dash, for now...
+# Lol dead project
+Used to be the plan for kennesaw motorsports DAQ before it got re-written like 10 times on a serprate repo using egui, then just being a bridge to foxglove studio then python, then it just turned into contributing to (this)[https://github.com/KSU-MS/fg_daq]
